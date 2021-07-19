@@ -1,0 +1,89 @@
+apiVersion: shipwright.io/v1alpha1
+kind: ClusterBuildStrategy
+metadata:
+  name: kaniko-trivy
+spec:
+  buildSteps:
+    - name: build
+      image: gcr.io/kaniko-project/executor:v1.5.2
+      workingDir: /workspace/source
+      securityContext:
+        runAsUser: 0
+        capabilities:
+          add:
+            - CHOWN
+            - DAC_OVERRIDE
+            - FOWNER
+            - SETGID
+            - SETUID
+            - SETFCAP
+            - KILL
+      env:
+        - name: AWS_ACCESS_KEY_ID
+          value: NOT_SET
+        - name: AWS_SECRET_KEY
+          value: NOT_SET
+      command:
+        - /kaniko/executor
+      args:
+        - --skip-tls-verify=true
+        - --dockerfile=$(build.dockerfile)
+        - --context=/workspace/source/$(build.source.contextDir)
+        - --destination=$(build.output.image)
+        - --oci-layout-path=/workspace/output/image
+        - --snapshotMode=redo
+        - --no-push
+        - --tarPath
+        - /tar/image.tar
+      volumeMounts:
+        - name: tar
+          mountPath: /tar/
+      resources:
+        limits:
+          cpu: 500m
+          memory: 1Gi
+        requests:
+          cpu: 250m
+          memory: 65Mi
+    # Reference:
+    # https://ibm-gsi-ecosystem.github.io/ibm-gsi-cloudnative-journey/developer-advanced-2/devsecops-trivy/
+    - name: trivy-scan
+      image: aquasec/trivy:0.19.1
+      volumeMounts:
+      - mountPath: /image/
+        name: tar
+      command:
+        - trivy
+      args:
+        - --exit-code=1
+        - --severity=CRITICAL
+        - --input
+        - /image/image.tar
+      resources:
+        limits:
+          cpu: 500m
+          memory: 1Gi
+        requests:
+          cpu: 250m
+          memory: 65Mi
+
+    # Reference:
+    # https://ibm-gsi-ecosystem.github.io/ibm-gsi-cloudnative-journey/developer-advanced-2/devsecops-trivy/
+    - name: crane-push
+      # TODO: Should add a tag here
+      image: gcr.io/go-containerregistry/crane
+      # Needed to read the docker config
+      securityContext:
+        runAsUser: 0
+      volumeMounts:
+      - mountPath: /image/
+        name: tar
+      command:
+        - crane
+      args:
+        - push
+        - /image/image.tar
+        - $(build.output.image)
+      env:
+        - name: DOCKER_CONFIG
+          value: /root/.docker/

@@ -1,0 +1,9 @@
+apiVersion: constraints.gatekeeper.sh/v1beta1
+kind: ShipwrightAllowlist
+metadata:
+  name: shipwrightallowlist
+spec:
+  match:
+    kinds:
+      - apiGroups: ["shipwright.io"]
+        kinds: ["Build"]

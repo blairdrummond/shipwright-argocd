@@ -1,0 +1,13 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+- base/shipwright-build_v0.5.1.yaml
+- base/tekton_v0.25.0.yaml
+# Builders: For a full list, see
+# https://github.com/shipwright-io/build/releases/download/nightly/default_strategies.yaml
+- builders/s2i.yaml
+- builders/kaniko.yaml
+# gatekeeper stuff (optional)
+- gatekeeper/constraint.yaml
+- gatekeeper/constraintTemplate.yaml

@@ -1,0 +1,27 @@
+apiVersion: shipwright.io/v1alpha1
+kind: Build
+metadata:
+  name: dash-s2i
+  namespace: dashboards
+spec:
+  source:
+    url: https://github.com/blairdrummond/dashboard-builder
+    revision: 6477337e5c6a0becfd783195e7855529c0d6e6b4
+    contextDir: dockerfiles/dash-s2i/
+  strategy:
+    name: kaniko-trivy
+    kind: ClusterBuildStrategy
+  dockerfile: Dockerfile
+  output:
+    image: blairdrummond/dash-s2i
+    credentials:
+      name: push-secret
+---
+apiVersion: shipwright.io/v1alpha1
+kind: BuildRun
+metadata:
+  name: dash-s2i
+  namespace: dashboards
+spec:
+  buildRef:
+    name: dash-s2i
