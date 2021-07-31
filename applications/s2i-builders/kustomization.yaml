@@ -2,5 +2,6 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
 resources:
-  - dash-s2i.yaml
-  - shiny-s2i.yaml
+  #- dash-s2i.yaml
+  #- shiny-s2i.yaml
+  - shipwright-test.yaml
