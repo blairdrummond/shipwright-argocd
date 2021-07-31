@@ -1,0 +1,33 @@
+apiVersion: templates.gatekeeper.sh/v1beta1
+kind: ConstraintTemplate
+metadata:
+  name: shipwrightallowlist
+spec:
+  crd:
+    spec:
+      names:
+        kind: ShipwrightAllowlist
+  targets:
+    - target: admission.k8s.gatekeeper.sh
+      rego: |
+        package shipwrightallowlist
+
+        violation[{"msg": msg}] {
+          input.review.object.kind == "Build"
+          repo_url := input.review.object.spec.source.url
+          repo = strings.replace_n({
+            "https://": "",
+            "http://": "",
+            "git://": "",
+            "ssh://": "",
+          }, repo_url)
+
+          # is the repo in the allowlist?
+          allowlist := [
+            good | source = input.parameters.allowedsources[_];
+            good = startswith(repo, source)
+          ]
+          not any(allowlist)
+
+          msg := sprintf("The Build repo has not been pre-approved: %v. Allowed sources are: %v", [repo, input.parameters.allowedsources])
+        }

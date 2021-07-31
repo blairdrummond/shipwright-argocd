@@ -5,3 +5,5 @@ namespace: gatekeeper-system
 resources:
   - https://raw.githubusercontent.com/open-policy-agent/gatekeeper/release-3.4/deploy/gatekeeper.yaml
   - gatekeeperconfig.yaml
+  - shipwright/constraintTemplate.yaml
+  - shipwright/constraint.yaml

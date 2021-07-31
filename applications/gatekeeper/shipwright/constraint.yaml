@@ -1,0 +1,17 @@
+apiVersion: constraints.gatekeeper.sh/v1beta1
+kind: ShipwrightAllowlist
+metadata:
+  name: shipwrightallowlist
+spec:
+  match:
+    kinds:
+      - apiGroups: ["shipwright.io"]
+        kinds: ["Build"]
+  parameters:
+    # Don't include the protocol. I.e.
+    # GOOD: "github.com/shipwright-io/"
+    # BAD:  "https://github.com/shipwright-io/"
+    allowedsources:
+      - "github.com/statcan/"
+      - "github.com/blairdrummond/"
+      - "github.com/shipwright-io/"

@@ -7,7 +7,4 @@ resources:
 # Builders: For a full list, see
 # https://github.com/shipwright-io/build/releases/download/nightly/default_strategies.yaml
 - builders/s2i.yaml
-- builders/kaniko.yaml
-# gatekeeper stuff (optional)
-- gatekeeper/constraint.yaml
-- gatekeeper/constraintTemplate.yaml
+- builders/kaniko-trivy.yaml
